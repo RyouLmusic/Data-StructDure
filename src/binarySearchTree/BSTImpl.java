@@ -5,7 +5,7 @@ import binaryTree.BinTree;
 
 public class BSTImpl<T extends Comparable> extends BST<T> {
 
-    private BinNode<T> _hot; // 被选中的节点的父节点
+    protected BinNode<T> _hot; // 被选中的节点的父节点
 
     private boolean isRChild = true;
 
@@ -17,7 +17,7 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
     }
 
     @Override
-    public BinNode<T> search(T data) {
+    public BinNode<T> search(T data) { //返回值是找到的节点
 
         _hot = null;
         return searchIn(_root, data, _hot);
@@ -80,7 +80,7 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
 
         if (binNode == null) return false; //确定binNode存在，而且_hot为binNode的父节点
 
-        removeAt(binNode, _hot); //分类进行删除
+        _hot = removeAt(binNode); //分类进行删除
 
         _size--;//规模减一
 
@@ -88,20 +88,34 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
         return true;
     }
 
-    private void removeAt(BinNode<T> binNode, BinNode<T> hot) {
+    protected BinNode<T> removeAt(BinNode<T> binNode) {
 
         BinNode<T> w = binNode; //实际被删除的节点
-
+        BinNode<T> hot = null;
         if (binNode.LChild == null){ //没有左孩子
-            binNode = binNode.RChild; //
 
-            hot = w.parent; //保存被删除节点的父节点，双分支的是保存数据交换后的
-            fromParent(hot, w, binNode);// 更新来自父节点的连接
+            if (binNode == _root && binNode.RChild != null){
+                _root = binNode.RChild;
+                _root.parent = null;
+            }else {
+                binNode = binNode.RChild; //
+                hot = w.parent; //保存被删除节点的父节点，双分支的是保存数据交换后的
+                fromParent(hot, w, binNode);// 更新来自父节点的连接
+            }
+
 
         }else if (binNode.RChild == null) { //没有右孩子
-            binNode = binNode.LChild;
-            hot = w.parent; //保存被删除节点的父节点，双分支的是保存数据交换后的
-            fromParent(hot, w, binNode);// 更新来自父节点的连接
+
+            if (binNode == _root && binNode.LChild != null){
+                _root = binNode.LChild;
+                _root.parent = null;
+            }else {
+
+                binNode = binNode.LChild;
+                hot = w.parent; //保存被删除节点的父节点，双分支的是保存数据交换后的
+
+                fromParent(hot, w, binNode);// 更新来自父节点的连接
+            }
 
         }else { //双分支
             binNode = getSuccessor(binNode);
@@ -121,7 +135,7 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
                 binNode.parent = hot;
 
         }
-
+        return hot;
     }
     //来自父节点的连接
     private void fromParent(BinNode<T> hot, BinNode<T> w, BinNode binNode) {
@@ -132,6 +146,7 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
         }
         if (binNode != null)
             binNode.parent = hot;
+
     }
 
     //找到w节点在中序遍历下的直接后继
@@ -149,17 +164,105 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
         }
     }
 
-
-    private BinNode<T> rotateAt(){
-        return null;
+    /**
+     * 旋转操作
+     * @param v
+     * @return
+     */
+    protected BinNode<T> rotateAt(BinNode<T> v, BinNode<T> p, BinNode<T> g){
+       return null;
     }
 
-    private BinNode<T> connect34(){
-        return null;
+    protected BinNode<T> rotateAt(BinNode<T> v){
+
+        BinNode<T> p = v.parent;
+        BinNode<T> g = p.parent; //视v、p和g相对位置分四种情况
+
+        if (p.isRChild(g)){ //zag(向右倾斜)
+
+            if (v.isRChild(p)){ // zag-zag
+
+                p.parent = g.parent; //向上联接
+                boolean connecSucc =  FromParentTo(p, p.parent);//向下连接
+                if (!connecSucc) {
+                    _root = p;
+                }
+
+
+                return connect34 ( g, p, v, g.LChild, p.LChild, v.LChild, v.RChild );
+            }else {  //zag-zig
+                v.parent = g.parent;
+
+                FromParentTo(v, v.parent);//向下连接
+
+                return connect34(g, v, p, g.LChild, v.LChild, v.RChild, p.RChild);
+            }
+
+        }else {// zig
+
+            if (v.isRChild(p)){ //zig-zag
+                v.parent = g.parent;
+
+                FromParentTo(v, v.parent);//向下连接
+
+                return connect34(p, v, g, p.LChild, v.LChild, v.RChild, g.RChild);
+            }else { //zig-zig
+                p.parent = g.parent; //向上联接
+
+                FromParentTo(p, p.parent);//向下连接
+                return connect34 ( v, p, g, v.LChild, v.LChild,p.RChild, g.RChild );
+            }
+        }
+
+    }
+
+    /**
+     * 3-4重构法：直接拆开整合
+     * @param a
+     * @param b
+     * @param c
+     * @param T0
+     * @param T1
+     * @param T2
+     * @param T3
+     * @return
+     */
+    protected BinNode<T> connect34(BinNode<T> a, BinNode<T> b, BinNode<T> c,
+                                   BinNode<T> T0, BinNode<T> T1, BinNode<T> T2, BinNode<T> T3){
+
+        a.LChild = T0;
+        if (T0 != null) T0.parent = a;
+        a.RChild = T1;
+        if (T1 != null) T1.parent = a;
+
+        c.LChild = T2;
+        if (T2 != null) T2.parent = c;
+        c.RChild = T3;
+        if (T3 != null) T3.parent = c;
+
+        b.LChild = a;
+        b.RChild = c;
+        a.parent = b;
+        c.parent = b;
+
+        updateHeight(a); //更新高度，T系列的高度并不会因为重构而改变
+        updateHeight(b);
+        updateHeight(c);
+
+        return b;
     }
 
 
-    public BinNode<T> get_hot(){
-        return _hot;
+    //来自父节点的连接
+    protected boolean FromParentTo(BinNode<T> child, BinNode<T> parent) {
+        if (parent != null && child.isRChild(parent)) { //利用短路原理
+            parent.RChild = child;
+            return true;
+        }
+        else if (parent != null) {
+            parent.LChild = child;
+            return true;
+        }
+        return false;
     }
 }

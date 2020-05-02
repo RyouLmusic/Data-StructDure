@@ -43,4 +43,17 @@ public class BinNode<T extends Comparable> {
         return s;
     }
 
+    /**
+     * 只在平衡搜索二叉树和AVL中有用
+     * @param parent
+     * @return
+     */
+    public boolean isRChild(BinNode<T> parent){ //判断this的节点是其父节点的右孩子
+
+        if (this.data.compareTo(parent.data) > 0)//在右边
+            return true;
+        else
+            return false;
+    }
+
 }

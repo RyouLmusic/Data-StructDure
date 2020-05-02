@@ -16,7 +16,7 @@ public class BinTree<T extends Comparable> {
         this._root = new BinNode<>(data);
     }
 
-    private int stature(BinNode<T> p){ //只有一个root的时候，其height为0；规定p为空树的时候height为-1
+    protected int stature(BinNode<T> p){ //只有一个root的时候，其height为0；规定p为空树的时候height为-1
         if(p == null)
             return -1;
         else

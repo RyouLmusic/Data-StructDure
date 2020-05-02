@@ -14,6 +14,9 @@ public class Main {
         binTree.insert(782);
         binTree.insert(254);
         binTree.insert(358);
+
+        binTree.remove(4);
+
         System.out.println("H: "+binTree.root().height);
 
         System.out.println(binTree.remove(11));
