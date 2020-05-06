@@ -20,10 +20,10 @@ public class BSTImpl<T extends Comparable> extends BST<T> {
     public BinNode<T> search(T data) { //返回值是找到的节点
 
         _hot = null;
-        return searchIn(_root, data, _hot);
+        return searchIn(_root, data);
     }
 
-    private BinNode<T> searchIn(BinNode<T> root, T data, BinNode<T> binNode) {
+    private BinNode<T> searchIn(BinNode<T> root, T data) {
 
         if (root == null || root.data == data) return root; //如果要找的目标就是root或者root为空，那么直接返回
         _hot = root.parent; //指定_hot
